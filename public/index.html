@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hackathon Project</title>
+  <style>
+    form {
+      text-align: center;
+      margin-top: 50px;
+    }
+    input[type="text"] {
+      font-size: 2em;
+      text-align: center;
+      width: 200px;
+      letter-spacing: 5px;
+    }
+    button {
+      font-size: 1.5em;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <form id="statusForm">
+    <input type="text" id="statusInput" maxlength="8" />
+    <button type="submit">Update</button>
+  </form>
+  <script>
+    // Fetch and display data in the input field
+    async function fetchData() {
+      try {
+        const response = await fetch('/api/data');
+        const data = await response.json();
+
+        // Extract statuses as a single string
+        const statuses = Object.values(data).map(item => item.status).join('');
+        document.getElementById('statusInput').value = statuses;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    // Update statuses when the form is submitted
+    async function updateStatuses(event) {
+      event.preventDefault(); // Prevent form submission
+
+      const input = document.getElementById('statusInput');
+      const newValue = input.value.trim();
+
+      // Validate the input
+      if (!/^[01]{8}$/.test(newValue)) {
+        alert('Invalid input. Please enter exactly 8 digits (0 or 1).');
+        return;
+      }
+
+      try {
+        // Send the new value to the backend
+        await fetch('/api/update-statuses', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ statuses: newValue.split('').map(Number) })
+        });
+
+        alert('Statuses updated successfully!');
+      } catch (error) {
+        console.error('Error updating statuses:', error);
+      }
+    }
+
+    // Attach event listener to the form
+    document.getElementById('statusForm').addEventListener('submit', updateStatuses);
+
+    // Auto-refresh the statuses every second
+    setInterval(fetchData, 10000);
+
+    // Fetch the initial data
+    fetchData();
+  </script>
+  <script>
+    // Fetch and display data in the input field
+    async function fetchData() {
+      try {
+        const response = await fetch('/api/data');
+        const data = await response.json();
+  
+        // Extract statuses as a single string
+        const statuses = Object.values(data).map(item => item.status).join('');
+        document.getElementById('statusInput').value = statuses;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+  
+    // Initial fetch when the page loads
+    fetchData();
+  </script>
+  
+</body>
+</html>
